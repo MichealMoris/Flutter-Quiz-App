@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/answer_button.dart';
+import 'package:quiz_app/data/questions.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class QuestionsScreen extends StatefulWidget {
-  const QuestionsScreen({super.key});
+  final void Function(String answer) onSelectedAnswer;
+  const QuestionsScreen({super.key, required this.onSelectedAnswer});
   @override
   State<QuestionsScreen> createState() {
     return _QuestionsScreenState();
@@ -10,38 +13,50 @@ class QuestionsScreen extends StatefulWidget {
 }
 
 class _QuestionsScreenState extends State<QuestionsScreen> {
+  var currentQuestionIndex = 0;
+
+  void answerQuestion(String answer) {
+    widget.onSelectedAnswer(answer);
+    setState(() {
+      currentQuestionIndex++;
+    });
+  }
+
   @override
   Widget build(context) {
+    var currentQuestion = questions[currentQuestionIndex];
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'question title is here...',
-            style: TextStyle(
-              color: Colors.white,
+      child: Container(
+        margin: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              currentQuestion.questionTitle,
+              style: GoogleFonts.tiltNeon(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          AnswerButton(
-            onPressed: () {},
-            child: const Text('Answer 1'),
-          ),
-          AnswerButton(
-            onPressed: () {},
-            child: const Text('Answer 2'),
-          ),
-          AnswerButton(
-            onPressed: () {},
-            child: const Text('Answer 3'),
-          ),
-          AnswerButton(
-            onPressed: () {},
-            child: const Text('Answer 4'),
-          ),
-        ],
+            const SizedBox(
+              height: 30,
+            ),
+            ...currentQuestion.getShuffledAnswers().map((answer) {
+              return AnswerButton(
+                onPressed: () {
+                  answerQuestion(answer);
+                },
+                child: Text(
+                  answer,
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
